@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags and Title -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirai - The Intelligent AI</title>
+
+    <!-- Include Compromise.js for NLP -->
+    <script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
+    <!-- Include Typo.js for Spell Checking -->
+    <script src="https://unpkg.com/typo-js@1.2.1/typo.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 450px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .chat-header {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            letter-spacing: 1px;
+        }
+        #chat-box {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-radius: 20px;
+            max-width: 80%;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: #ff7f50;
+            color: white;
+            align-self: flex-end;
+        }
+        .ai-message {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            align-self: flex-start;
+        }
+        .input-container {
+            display: flex;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        #user-input {
+            flex-grow: 1;
+            padding: 20px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        #user-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        #send-btn {
+            padding: 20px;
+            border: none;
+            background: #ff7f50;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+        #send-btn:hover {
+            background: #e66c44;
+        }
+        ::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 90vh;
+            }
+            .chat-header {
+                font-size: 1.2rem;
+                padding: 15px;
+            }
+            .message {
+                font-size: 0.8rem;
+                padding: 10px 15px;
+            }
+            #user-input {
+                font-size: 0.8rem;
+                padding: 15px;
+            }
+            #send-btn {
+                font-size: 0.8rem;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">Mirai</div>
+        <div id="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Select DOM elements
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // AI Chatbot Class
+        class IntelligentAIModule {
+            constructor() {
+                this.learnedResponses = JSON.parse(localStorage.getItem('learnedResponses')) || {};
+                this.intents = [
+                    {
+                        tag: "greeting",
+                        patterns: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"],
+                        responses: ["Hello! How can I assist you today?", "Hi there! What can I do for you?"]
+                    },
+                    {
+                        tag: "farewell",
+                        patterns: ["bye", "goodbye", "see you later", "farewell", "take care"],
+                        responses: ["Goodbye! Have a great day!", "See you later!"]
+                    },
+                    {
+                        tag: "thanks",
+                        patterns: ["thank you", "thanks", "appreciate it"],
+                        responses: ["You're welcome!", "No problem!", "Anytime!"]
+                    },
+                    {
+                        tag: "identity",
+                        patterns: ["who are you", "what is your name", "what are you", "who is mirai", "what is mirai"],
+                        responses: ["I am Mirai, your intelligent AI assistant."]
+                    },
+                    {
+                        tag: "creator",
+                        patterns: ["who created you", "who made you", "who developed you", "who is your creator"],
+                        responses: ["I was created by Mynul Islam Rafi."]
+                    },
+                    {
+                        tag: "purpose",
+                        patterns: ["what do you do", "what's your purpose", "what is your job", "how can you help me"],
+                        responses: ["I am here to answer your questions and provide information."]
+                    },
+                    {
+                        tag: "mood",
+                        patterns: ["how are you", "how are you doing", "what's up", "how's it going"],
+                        responses: ["I'm functioning optimally!", "I'm here to assist you!", "Feeling helpful as always!"]
+                    },
+                    {
+                        tag: "jokes",
+                        patterns: ["tell me a joke", "make me laugh", "joke"],
+                        responses: ["Why did the scarecrow win an award? Because he was outstanding in his field!", "I would tell you a chemistry joke but I know I wouldn't get a reaction."]
+                    },
+                    {
+                        tag: "information",
+                        patterns: ["tell me about", "what is", "who is", "define", "explain"],
+                        responses: []
+                    },
+                ];
+            }
+
+            saveLearnedResponses() {
+                localStorage.setItem('learnedResponses', JSON.stringify(this.learnedResponses));
+            }
+
+            async getResponse(input) {
+                const intent = this.getIntent(input);
+
+                if (intent) {
+                    if (intent.tag === "information") {
+                        const entity = input.replace(new RegExp(intent.patterns.join('|'), 'gi'), '').trim();
+                        return await this.fetchFromWikipedia(entity);
+                    }
+
+                    if (intent.responses.length > 0) {
+                        return intent.responses[Math.floor(Math.random() * intent.responses.length)];
+                    }
+                }
+
+                if (this.learnedResponses[input]) {
+                    return this.learnedResponses[input];
+                }
+
+                return "I'm sorry, I couldn't understand that. Could you rephrase?";
+            }
+
+            getIntent(input) {
+                input = input.toLowerCase();
+                for (const intent of this.intents) {
+                    for (const pattern of intent.patterns) {
+                        if (input.includes(pattern)) {
+                            return intent;
+                        }
+                    }
+                }
+                return null;
+            }
+
+            async fetchFromWikipedia(query) {
+                try {
+                    const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error("Network response was not ok.");
+                    const data = await response.json();
+
+                    if (data.extract) {
+                        return data.extract;
+                    } else {
+                        return "I'm sorry, I couldn't find any information on that.";
+                    }
+                } catch (error) {
+                    console.error("Error fetching from Wikipedia API:", error);
+                    return "I'm sorry, I couldn't retrieve information at this time.";
+                }
+            }
+        }
+
+        const ai = new IntelligentAIModule();
+
+        function addMessage(sender, message, className) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message;
+            messageElement.classList.add('message', className);
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        sendBtn.addEventListener('click', async () => {
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+
+            addMessage("You", userMessage, "user-message");
+            userInput.value = "";
+
+            const aiResponse = await ai.getResponse(userMessage);
+            addMessage("Mirai", aiResponse, "ai-message");
+        });
+
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') sendBtn.click();
+        });
+    </script>
+</body>
+</html>
