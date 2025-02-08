@@ -5,7 +5,7 @@ const sendBtn = document.getElementById('send-btn');
 
 class IntelligentAIModule {
     constructor() {
-        this.learnedResponses = JSON.parse(localStorage.getItem('learnedResponses')) || {};
+        this.learnedResponses = {};
         this.intents = [
             { tag: "greeting", patterns: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"], responses: ["Hello! How can I assist you today?", "Hi there! What can I do for you?"] },
             { tag: "farewell", patterns: ["bye", "goodbye", "see you later", "farewell", "take care"], responses: ["Goodbye! Have a great day!", "See you later!"] },
@@ -17,10 +17,62 @@ class IntelligentAIModule {
             { tag: "jokes", patterns: ["tell me a joke", "make me laugh", "joke"], responses: ["Why did the scarecrow win an award? Because he was outstanding in his field!", "I would tell you a chemistry joke but I know I wouldn't get a reaction."] },
             { tag: "information", patterns: ["tell me about", "what is", "who is", "define", "explain"], responses: [] },
         ];
+        this.githubToken = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"; // Replace with your GitHub PAT
+        this.repoOwner = "YOUR_GITHUB_USERNAME"; // Replace with your GitHub username
+        this.repoName = "YOUR_REPOSITORY_NAME"; // Replace with your repository name
+        this.filePath = "learnedResponses.json"; // File to store learned responses
+        this.loadLearnedResponses();
     }
 
-    saveLearnedResponses() {
-        localStorage.setItem('learnedResponses', JSON.stringify(this.learnedResponses));
+    async loadLearnedResponses() {
+        try {
+            const response = await fetch(`https://api.github.com/repos/mynulrafi/ai-learned-responses/contents/learnedResponses.json`, {
+                headers: {
+                    Authorization: `token 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`,
+                },
+            });
+            const data = await response.json();
+            const content = atob(data.content); // Decode Base64 content
+            this.learnedResponses = JSON.parse(content);
+        } catch (error) {
+            console.error("Error loading learned responses:", error);
+        }
+    }
+
+    async saveLearnedResponses() {
+        try {
+            const content = btoa(JSON.stringify(this.learnedResponses)); // Encode to Base64
+            const response = await fetch(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${this.filePath}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `token ${this.githubToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    message: "Update learned responses",
+                    content: content,
+                    sha: await this.getFileSHA(),
+                }),
+            });
+            if (!response.ok) throw new Error("Failed to save learned responses.");
+        } catch (error) {
+            console.error("Error saving learned responses:", error);
+        }
+    }
+
+    async getFileSHA() {
+        try {
+            const response = await fetch(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${this.filePath}`, {
+                headers: {
+                    Authorization: `token ${this.githubToken}`,
+                },
+            });
+            const data = await response.json();
+            return data.sha;
+        } catch (error) {
+            console.error("Error fetching file SHA:", error);
+            return null;
+        }
     }
 
     async getResponse(input) {
