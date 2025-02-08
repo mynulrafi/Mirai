@@ -5,7 +5,6 @@ const sendBtn = document.getElementById('send-btn');
 
 class IntelligentAIModule {
     constructor() {
-        // Load learned responses from localStorage
         this.learnedResponses = JSON.parse(localStorage.getItem('learnedResponses')) || {};
         this.intents = [
             { tag: "greeting", patterns: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"], responses: ["Hello! How can I assist you today?", "Hi there! What can I do for you?"] },
@@ -20,42 +19,27 @@ class IntelligentAIModule {
         ];
     }
 
-    // Save learned responses to localStorage
     saveLearnedResponses() {
-        try {
-            localStorage.setItem('learnedResponses', JSON.stringify(this.learnedResponses));
-            console.log("Learned responses saved to localStorage.");
-        } catch (error) {
-            console.error("Error saving learned responses to localStorage:", error);
-        }
+        localStorage.setItem('learnedResponses', JSON.stringify(this.learnedResponses));
     }
 
-    // Get a response based on user input
     async getResponse(input) {
-        console.log("Processing input:", input); // Debugging log
         const intent = this.getIntent(input);
         if (intent) {
-            console.log("Matched intent:", intent.tag); // Debugging log
             if (intent.tag === "information") {
                 const entity = input.replace(new RegExp(intent.patterns.join('|'), 'gi'), '').trim();
-                console.log("Fetching information about:", entity); // Debugging log
                 return await this.fetchFromWikipedia(entity);
             }
             if (intent.responses.length > 0) {
-                const response = intent.responses[Math.floor(Math.random() * intent.responses.length)];
-                console.log("Returning intent response:", response); // Debugging log
-                return response;
+                return intent.responses[Math.floor(Math.random() * intent.responses.length)];
             }
         }
         if (this.learnedResponses[input]) {
-            console.log("Returning learned response:", this.learnedResponses[input]); // Debugging log
             return this.learnedResponses[input];
         }
-        console.log("No response found. Returning default fallback."); // Debugging log
         return "I'm sorry, I couldn't understand that. Could you rephrase?";
     }
 
-    // Match user input to an intent
     getIntent(input) {
         input = nlp(input).normalize().out('text'); // Normalize input using Compromise.js
         for (const intent of this.intents) {
@@ -68,7 +52,6 @@ class IntelligentAIModule {
         return null;
     }
 
-    // Fetch information from Wikipedia
     async fetchFromWikipedia(query) {
         try {
             const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
@@ -76,10 +59,8 @@ class IntelligentAIModule {
             if (!response.ok) throw new Error("Network response was not ok.");
             const data = await response.json();
             if (data.extract) {
-                console.log("Fetched Wikipedia summary:", data.extract); // Debugging log
                 return data.extract;
             } else {
-                console.log("No Wikipedia summary found for query:", query); // Debugging log
                 return "I'm sorry, I couldn't find any information on that.";
             }
         } catch (error) {
@@ -88,17 +69,14 @@ class IntelligentAIModule {
         }
     }
 
-    // Learn a new response from the user
     learnResponse(question, answer) {
         this.learnedResponses[question] = answer;
-        this.saveLearnedResponses(); // Save the updated responses to localStorage
+        this.saveLearnedResponses();
     }
 }
 
-// Initialize the AI module
 const ai = new IntelligentAIModule();
 
-// Add a message to the chat box
 function addMessage(sender, message, className) {
     const messageElement = document.createElement('div');
     messageElement.textContent = message;
@@ -107,7 +85,6 @@ function addMessage(sender, message, className) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Handle user input and send button click
 sendBtn.addEventListener('click', async () => {
     const userMessage = userInput.value.trim();
     if (!userMessage) return;
@@ -125,13 +102,11 @@ sendBtn.addEventListener('click', async () => {
             addMessage("Mirai", "Please provide a valid teaching format: 'teach: question : answer'.", "ai-message");
         }
     } else {
-        console.log("Getting response for input:", userMessage); // Debugging log
         const aiResponse = await ai.getResponse(userMessage);
         addMessage("Mirai", aiResponse, "ai-message");
     }
 });
 
-// Handle pressing the Enter key
 userInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') sendBtn.click();
 });
