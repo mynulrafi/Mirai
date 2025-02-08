@@ -19,13 +19,13 @@ class IntelligentAIModule {
         ];
 
         // GitHub configuration
-        this.githubToken = "ghp_your_generated_token_here"; // Replace with your GitHub PAT
+        this.githubToken = "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"; // Replace with your GitHub PAT
         this.repoOwner = "mynulrafi"; // Your GitHub username
         this.repoName = "ai-learned-responses"; // Replace with your repository name
         this.filePath = "learnedResponses.json"; // Path to the JSON file in your repository
 
-        // Load learned responses from GitHub when the app starts
-        this.loadLearnedResponses();
+        console.log("Initializing AI module...");
+        this.loadLearnedResponses(); // Load learned responses from GitHub when the app starts
     }
 
     // Load learned responses from GitHub
@@ -101,7 +101,7 @@ class IntelligentAIModule {
         try {
             const response = await fetch(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${this.filePath}`, {
                 headers: {
-                    Authorization: `token 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`,
+                    Authorization: `token ${this.githubToken}`,
                 },
             });
 
@@ -119,19 +119,26 @@ class IntelligentAIModule {
 
     // Get a response based on user input
     async getResponse(input) {
+        console.log("Processing input:", input); // Debugging log
         const intent = this.getIntent(input);
         if (intent) {
+            console.log("Matched intent:", intent.tag); // Debugging log
             if (intent.tag === "information") {
                 const entity = input.replace(new RegExp(intent.patterns.join('|'), 'gi'), '').trim();
+                console.log("Fetching information about:", entity); // Debugging log
                 return await this.fetchFromWikipedia(entity);
             }
             if (intent.responses.length > 0) {
-                return intent.responses[Math.floor(Math.random() * intent.responses.length)];
+                const response = intent.responses[Math.floor(Math.random() * intent.responses.length)];
+                console.log("Returning intent response:", response); // Debugging log
+                return response;
             }
         }
         if (this.learnedResponses[input]) {
+            console.log("Returning learned response:", this.learnedResponses[input]); // Debugging log
             return this.learnedResponses[input];
         }
+        console.log("No response found. Returning default fallback."); // Debugging log
         return "I'm sorry, I couldn't understand that. Could you rephrase?";
     }
 
@@ -156,8 +163,10 @@ class IntelligentAIModule {
             if (!response.ok) throw new Error("Network response was not ok.");
             const data = await response.json();
             if (data.extract) {
+                console.log("Fetched Wikipedia summary:", data.extract); // Debugging log
                 return data.extract;
             } else {
+                console.log("No Wikipedia summary found for query:", query); // Debugging log
                 return "I'm sorry, I couldn't find any information on that.";
             }
         } catch (error) {
@@ -203,6 +212,7 @@ sendBtn.addEventListener('click', async () => {
             addMessage("Mirai", "Please provide a valid teaching format: 'teach: question : answer'.", "ai-message");
         }
     } else {
+        console.log("Getting response for input:", userMessage); // Debugging log
         const aiResponse = await ai.getResponse(userMessage);
         addMessage("Mirai", aiResponse, "ai-message");
     }
