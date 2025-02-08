@@ -1,0 +1,126 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #2c3e50, #4ca1af);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.chat-container {
+    width: 90%;
+    max-width: 450px;
+    height: 85vh;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.chat-header {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    letter-spacing: 1px;
+}
+
+#chat-box {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 15px 20px;
+    border-radius: 20px;
+    max-width: 80%;
+    line-height: 1.5;
+    font-size: 0.9rem;
+    word-wrap: break-word;
+}
+
+.user-message {
+    background: #ff7f50;
+    color: white;
+    align-self: flex-end;
+}
+
+.ai-message {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    align-self: flex-start;
+}
+
+.input-container {
+    display: flex;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#user-input {
+    flex-grow: 1;
+    padding: 20px;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+#user-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+#send-btn {
+    padding: 20px;
+    border: none;
+    background: #ff7f50;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+#send-btn:hover {
+    background: #e66c44;
+}
+
+::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 600px) {
+    .chat-container {
+        height: 90vh;
+    }
+    .chat-header {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+    .message {
+        font-size: 0.8rem;
+        padding: 10px 15px;
+    }
+    #user-input {
+        font-size: 0.8rem;
+        padding: 15px;
+    }
+    #send-btn {
+        font-size: 0.8rem;
+        padding: 15px;
+    }
+}
