@@ -19,9 +19,9 @@ class IntelligentAIModule {
         ];
 
         // GitHub configuration
-        this.githubToken = "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"; // Replace with your GitHub PAT
+        this.githubToken = "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"; // Your GitHub PAT
         this.repoOwner = "mynulrafi"; // Your GitHub username
-        this.repoName = "ai-learned-responses"; // Replace with your repository name
+        this.repoName = "ai-learned-responses"; // Your repository name
         this.filePath = "learnedResponses.json"; // Path to the JSON file in your repository
 
         console.log("Initializing AI module...");
